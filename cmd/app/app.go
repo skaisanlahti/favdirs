@@ -52,7 +52,7 @@ func (this Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "esc", "ctrl+c":
 			this.selected = currentLocation()
-			return this, tea.Quit
+			return this, saveAndQuit(this)
 
 		case " ":
 			if this.mode == ModeSelect {
@@ -276,15 +276,8 @@ func main() {
 	}
 
 	program := tea.NewProgram(NewModel())
-	result, err := program.Run()
+	_, err := program.Run()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error running favdirs:", err)
 	}
-
-	model, ok := result.(Model)
-	if !ok {
-		log.Fatal(err)
-	}
-
-	saveSelected(model.selected)
 }
