@@ -94,6 +94,11 @@ func (this Model) View() string {
 
 	return selectView(this)
 }
+func dirName(path string) string {
+	parts := strings.Split(path, "/")
+	name := parts[len(parts)-1]
+	return name
+}
 
 func deleteView(model Model) string {
 	var builder strings.Builder
@@ -106,7 +111,8 @@ func deleteView(model Model) string {
 	sort.Strings(keys)
 	for _, key := range keys {
 		path := model.locations[key]
-		builder.WriteString(fmt.Sprintf("xxx [%s] %s\n", key, path))
+		dir := dirName(path)
+		builder.WriteString(fmt.Sprintf("xxx [%s] %s\n", key, dir))
 	}
 
 	builder.WriteString(fmt.Sprintf("\n[help] %s [space] %s [esc] exit\n", model.helpText, ModeSelect))
@@ -124,7 +130,8 @@ func selectView(model Model) string {
 	sort.Strings(keys)
 	for _, key := range keys {
 		path := model.locations[key]
-		builder.WriteString(fmt.Sprintf("--> [%s] %s\n", key, path))
+		dir := dirName(path)
+		builder.WriteString(fmt.Sprintf("--> [%s] %s\n", key, dir))
 	}
 
 	builder.WriteString(fmt.Sprintf("\n[help] %s [space] %s [esc] exit\n", model.helpText, ModeDelete))
