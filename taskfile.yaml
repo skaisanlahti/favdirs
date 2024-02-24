@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -o bin/fd ./cmd/main.go
+
+
+  run:
+    cmds:
+      - go run ./cmd/main.go
