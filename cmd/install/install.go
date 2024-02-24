@@ -11,70 +11,89 @@ import (
 const (
 	startComment     = "# fd-app-def"
 	endComment       = "# fd-app-end"
-	functionTemplate = "./cmd/install/shell-template"
+	functionTemplate = "./cmd/install/function-template"
 	executablePath   = "/usr/local/bin/fd-app"
 	stateDirectory   = "/fd-app"
 )
 
-type TemplateData struct {
+type functionTemplateData struct {
 	ExecutablePath string
 	SelectPath     string
 	StartComment   string
 	EndComment     string
 }
 
+func createFileIfNotExist(filePath string) error {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666)
+	if err != nil {
+
+		return err
+	}
+
+	defer file.Close()
+	return nil
+}
+
 func main() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Error finding user home directory: ", err)
+		fmt.Println("Error finding user home directory:", err)
 		return
 	}
 
 	stateDir := homeDir + stateDirectory
-	err = os.MkdirAll(stateDir, 0755) // 0755 commonly used for directories
+	err = os.MkdirAll(stateDir, 0755)
 	if err != nil {
-		fmt.Println("Error creating state directory: ", err)
+		fmt.Println("Error creating state directory:", err)
 		return
 	}
-	fmt.Println("Created fd-app state directory in: ", stateDir)
+
 	selectFile := stateDir + "/select"
+	err = createFileIfNotExist(selectFile)
+	if err != nil {
+		if os.IsExist(err) {
+			fmt.Printf("File at %s already exists, skipping creation.\n", selectFile)
+		} else {
+			fmt.Println("Error creating select file:", err)
+			return
+		}
+	} else {
+		fmt.Println("Created select file at:", selectFile)
+	}
+
 	locationsFile := stateDir + "/locations"
-
-	err = os.WriteFile(selectFile, []byte{}, 0666)
+	err = createFileIfNotExist(locationsFile)
 	if err != nil {
-		fmt.Println("Error creating select file: ", err)
-		return
+		if os.IsExist(err) {
+			fmt.Printf("File at %s already exists, skipping creation.\n", locationsFile)
+		} else {
+			fmt.Println("Error creating locations file:", err)
+			return
+		}
+	} else {
+		fmt.Println("Created locations file at:", locationsFile)
 	}
 
-	err = os.WriteFile(locationsFile, []byte{}, 0666)
-	if err != nil {
-		fmt.Println("Error creating locations file: ", err)
-		return
-	}
-
-	// Prepare the template data
-	data := TemplateData{
-		ExecutablePath: executablePath,
-		SelectPath:     homeDir + stateDirectory + "/select",
-		StartComment:   startComment,
-		EndComment:     endComment,
-	}
-
-	// Parse and execute the template
 	tmpl, err := template.ParseFiles(functionTemplate)
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
 
-	// Create a builder to hold the executed template
+	data := functionTemplateData{
+		ExecutablePath: executablePath,
+		SelectPath:     homeDir + stateDirectory + "/select",
+		StartComment:   startComment,
+		EndComment:     endComment,
+	}
+
 	var builder strings.Builder
 	if err := tmpl.Execute(&builder, data); err != nil {
 		fmt.Println("Error executing template:", err)
 		return
 	}
-	functionDefinition := builder.String()
 
+	functionDefinition := builder.String()
 	bashrcPath := homeDir + "/.bashrc"
 	tempFilePath := bashrcPath + ".tmp"
 	bashrcFile, err := os.Open(bashrcPath)
@@ -96,8 +115,6 @@ func main() {
 	scanner := bufio.NewScanner(bashrcFile)
 	for scanner.Scan() {
 		line := scanner.Text()
-
-		// Skip lines until the end comment is found
 		if inFunction {
 			if line == endComment {
 				inFunction = false
@@ -105,11 +122,9 @@ func main() {
 			continue
 		}
 
-		// Check for the start of the function definition
 		if line == startComment {
 			inFunction = true
 			updated = true
-			// Write the new function definition
 			if _, err := tempFile.WriteString(functionDefinition); err != nil {
 				fmt.Println("Error writing function definition:", err)
 				return
@@ -117,14 +132,12 @@ func main() {
 			continue
 		}
 
-		// Write lines outside of the function definition
 		if _, err := tempFile.WriteString(line + "\n"); err != nil {
 			fmt.Println("Error writing to temporary file:", err)
 			return
 		}
 	}
 
-	// If the function was not found and updated, append it
 	if !updated {
 		if _, err := tempFile.WriteString("\n" + functionDefinition + "\n"); err != nil {
 			fmt.Println("Error appending function definition:", err)
@@ -137,7 +150,6 @@ func main() {
 		return
 	}
 
-	// Replace the original .bashrc with the updated version
 	if err := os.Rename(tempFilePath, bashrcPath); err != nil {
 		fmt.Println("Error updating .bashrc:", err)
 		return

@@ -11,10 +11,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+const (
+	ModeSelect = "select"
+	ModeDelete = "delete"
+)
+
 type Model struct {
 	locations map[string]string
 	selected  string
 	helpText  string
+	mode      string
 }
 
 func NewModel() Model {
@@ -32,6 +38,7 @@ func NewModel() Model {
 		locations: loc,
 		selected:  selected,
 		helpText:  "Select location using the key in brackets.",
+		mode:      ModeSelect,
 	}
 }
 
@@ -46,51 +53,81 @@ func (this Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "esc", "ctrl+c":
 			this.selected = currentLocation()
 			return this, tea.Quit
+
+		case " ":
+			if this.mode == ModeSelect {
+				this.mode = ModeDelete
+				this.helpText = "Delete a bound directory."
+				return this, nil
+			}
+
+			this.helpText = "Select directory to jump to."
+			this.mode = ModeSelect
+			return this, nil
+
 		default:
 			key := msg.String()
-			if strings.HasPrefix(key, "alt+") {
-				key = strings.Split(key, "+")[1]
-				path, ok := this.locations[key]
-				if ok {
-					delete(this.locations, key)
-					this.selected = path
-					this.helpText = fmt.Sprintf("Removed locations from %s.", key)
-					return this, saveChanges(this)
-				}
+			path, ok := this.locations[key]
+			if !ok {
+				this.helpText = fmt.Sprintf("No directory bound to %s.", key)
+				return this, nil
+			}
 
-				this.helpText = fmt.Sprintf("Failed to remove location. Nothing saved for %s.", key)
+			if this.mode == ModeDelete {
+				delete(this.locations, key)
+				this.helpText = fmt.Sprintf("Removed directory from %s.", key)
 				return this, saveChanges(this)
 			}
 
-			path, ok := this.locations[key]
-			if ok {
-				this.selected = path
-				return this, saveAndQuit(this)
-			}
-
-			this.helpText = fmt.Sprintf("No location bound to %s, try again.", key)
+			this.selected = path
+			return this, saveAndQuit(this)
 		}
-
 	}
+
 	return this, nil
 }
 
 func (this Model) View() string {
+	if this.mode == ModeDelete {
+		return deleteView(this)
+	}
+
+	return selectView(this)
+}
+
+func deleteView(model Model) string {
+	var builder strings.Builder
+	builder.WriteString("Fav Dirs\n\n")
+
 	keys := []string{}
-	for k := range this.locations {
+	for k := range model.locations {
 		keys = append(keys, k)
 	}
-
 	sort.Strings(keys)
-	var builder strings.Builder
-
-	builder.WriteString("Favourite Locations:\n\n")
 	for _, key := range keys {
-		path := this.locations[key]
-		builder.WriteString(fmt.Sprintf("[%s] %s\n", key, path))
+		path := model.locations[key]
+		builder.WriteString(fmt.Sprintf("xxx [%s] %s\n", key, path))
 	}
 
-	builder.WriteString(fmt.Sprintf("\n%s", this.helpText))
+	builder.WriteString(fmt.Sprintf("\n[help] %s [space] %s [esc] exit\n", model.helpText, ModeSelect))
+	return builder.String()
+}
+
+func selectView(model Model) string {
+	var builder strings.Builder
+	builder.WriteString("Fav Dirs\n\n")
+
+	keys := []string{}
+	for k := range model.locations {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		path := model.locations[key]
+		builder.WriteString(fmt.Sprintf("--> [%s] %s\n", key, path))
+	}
+
+	builder.WriteString(fmt.Sprintf("\n[help] %s [space] %s [esc] exit\n", model.helpText, ModeDelete))
 	return builder.String()
 }
 

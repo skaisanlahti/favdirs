@@ -12,9 +12,3 @@ tasks:
     dir: /home/dev
     cmds:
       - source .bashrc
-
-  run:
-    cmds:
-      - go run ./cmd/main.go
-
-  
