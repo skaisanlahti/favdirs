@@ -1,2 +1,3 @@
 taskfile*.yml
 taskfile*.yaml
+bin/
