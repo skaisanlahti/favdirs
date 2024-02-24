@@ -1,0 +1,7 @@
+{{.StartComment}}
+function fd() {
+    {{.ExecutablePath}} "$@"
+    output=$(< {{.SelectPath}})
+    cd $output
+}
+{{.EndComment}}

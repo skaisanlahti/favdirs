@@ -3,9 +3,18 @@ version: '3'
 tasks:
   build:
     cmds:
-      - go build -o bin/fd ./cmd/main.go
+      - go build -o build/fd-app ./cmd/app/app.go
+      - sudo cp build/fd-app /usr/local/bin/fd-app
+      - go run ./cmd/install/install.go
+      - task source
 
+  source:
+    dir: /home/dev
+    cmds:
+      - source .bashrc
 
   run:
     cmds:
       - go run ./cmd/main.go
+
+  
