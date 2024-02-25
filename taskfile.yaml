@@ -6,8 +6,3 @@ tasks:
       - go build -o ./build/app ./cmd/app/app.go
       - go run ./cmd/install/install.go
       - cd && source .bashrc
-
-  source:
-    dir: /home/dev
-    cmds:
-      - source .bashrc
