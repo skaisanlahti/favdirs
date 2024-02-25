@@ -85,28 +85,3 @@ func (this LocationService) SaveLocations(locations map[string]string) error {
 
 	return nil
 }
-
-func (this LocationService) AddLocation(key string) error {
-	locations, err := this.ReadSavedLocations()
-	if err != nil {
-		return err
-	}
-
-	location, err := this.CurrentLocation()
-	if err != nil {
-		return err
-	}
-
-	locations[key] = location
-	err = this.SaveLocations(locations)
-	if err != nil {
-		return err
-	}
-
-	err = this.SaveSelectedLocation(location)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
