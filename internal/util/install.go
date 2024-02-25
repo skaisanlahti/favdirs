@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"bufio"
@@ -13,7 +13,7 @@ const (
 	startComment     = "# fd-cmd-def"
 	endComment       = "# fd-cmd-end"
 	alias            = "fd"
-	functionTemplate = "./cmd/install/function-template"
+	functionTemplate = "./internal/util/function_template"
 	executablePath   = "/app"
 	appDir           = "/.fd-app"
 )
@@ -37,36 +37,29 @@ func createFileIfNotExist(filePath string) error {
 	return nil
 }
 
-// CopyFile copies a file from src to dst. If src and dst files exist, and are the same,
-// then an error is returned. If dst does not exist, it is created with permissions copied
-// from src.
-func copyFile(src, dst string) error {
-	// Open the source file for reading
-	srcFile, err := os.Open(src)
+func copyFile(sourcePath, targetPath string) error {
+	sourceFile, err := os.Open(sourcePath)
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
+	defer sourceFile.Close()
 
-	// Get the source file's permissions
-	srcFileInfo, err := srcFile.Stat()
+	sourceFileInfo, err := sourceFile.Stat()
 	if err != nil {
 		return err
 	}
 
-	// Create the destination file with the same permissions as the source file
-	dstFile, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, srcFileInfo.Mode())
+	targetFile, err := os.OpenFile(targetPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, sourceFileInfo.Mode())
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
+	defer targetFile.Close()
 
-	// Copy the contents of the source file to the destination file
-	_, err = io.Copy(dstFile, srcFile)
+	_, err = io.Copy(targetFile, sourceFile)
 	return err
 }
 
-func main() {
+func Install() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Println("Error finding user home directory:", err)

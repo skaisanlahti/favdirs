@@ -3,6 +3,6 @@ version: '3'
 tasks:
   build:
     cmds:
-      - go build -o ./build/app ./cmd/app/app.go
-      - go run ./cmd/install/install.go
+      - go build -o ./build/app ./cmd/app/main.go
+      - go run ./cmd/install/main.go
       - cd && source .bashrc
