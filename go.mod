@@ -1,4 +1,4 @@
-module github.com/skaisanlahti/go-nav
+module github.com/skaisanlahti/favdirs
 
 go 1.22.0
 

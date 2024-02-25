@@ -3,23 +3,26 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/template"
 )
 
 const (
-	startComment     = "# fd-app-def"
-	endComment       = "# fd-app-end"
+	startComment     = "# fd-cmd-def"
+	endComment       = "# fd-cmd-end"
+	alias            = "fd"
 	functionTemplate = "./cmd/install/function-template"
-	executablePath   = "/usr/local/bin/fd-app"
-	stateDirectory   = "/fd-app"
+	executablePath   = "/app"
+	appDir           = "/.fd-app"
 )
 
 type functionTemplateData struct {
 	ExecutablePath string
 	SelectPath     string
 	StartComment   string
+	Alias          string
 	EndComment     string
 }
 
@@ -34,6 +37,35 @@ func createFileIfNotExist(filePath string) error {
 	return nil
 }
 
+// CopyFile copies a file from src to dst. If src and dst files exist, and are the same,
+// then an error is returned. If dst does not exist, it is created with permissions copied
+// from src.
+func copyFile(src, dst string) error {
+	// Open the source file for reading
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	// Get the source file's permissions
+	srcFileInfo, err := srcFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	// Create the destination file with the same permissions as the source file
+	dstFile, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, srcFileInfo.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	// Copy the contents of the source file to the destination file
+	_, err = io.Copy(dstFile, srcFile)
+	return err
+}
+
 func main() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -41,14 +73,21 @@ func main() {
 		return
 	}
 
-	stateDir := homeDir + stateDirectory
-	err = os.MkdirAll(stateDir, 0755)
+	dir := homeDir + appDir
+	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		fmt.Println("Error creating state directory:", err)
 		return
 	}
 
-	selectFile := stateDir + "/select"
+	executableFile := dir + executablePath
+	err = copyFile("./build"+executablePath, executableFile)
+	if err != nil {
+		fmt.Println("Error moving executable to app directory:", err)
+		return
+	}
+
+	selectFile := dir + "/select"
 	err = createFileIfNotExist(selectFile)
 	if err != nil {
 		if os.IsExist(err) {
@@ -61,7 +100,7 @@ func main() {
 		fmt.Println("Created select file at:", selectFile)
 	}
 
-	locationsFile := stateDir + "/locations"
+	locationsFile := dir + "/locations"
 	err = createFileIfNotExist(locationsFile)
 	if err != nil {
 		if os.IsExist(err) {
@@ -81,9 +120,10 @@ func main() {
 	}
 
 	data := functionTemplateData{
-		ExecutablePath: executablePath,
-		SelectPath:     homeDir + stateDirectory + "/select",
+		ExecutablePath: homeDir + appDir + executablePath,
+		SelectPath:     selectFile,
 		StartComment:   startComment,
+		Alias:          alias,
 		EndComment:     endComment,
 	}
 
