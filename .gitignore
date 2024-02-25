@@ -1,3 +1,3 @@
-taskfile*
-taskfiles/
+taskfile.yaml
+taskfile.yml
 build/
