@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -32,7 +33,7 @@ func NewViewService(locationService LocationService) ViewService {
 	return ViewService{
 		locationService: locationService,
 		locations:       locations,
-		helpText:        "Select location using the key in brackets.",
+		helpText:        "Select a location to jump to.",
 		mode:            ModeSelect,
 	}
 }
@@ -60,11 +61,11 @@ func (this ViewService) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ":
 			if this.mode == ModeSelect {
 				this.mode = ModeDelete
-				this.helpText = "Delete a bound directory."
+				this.helpText = "Delete a location binding."
 				return this, nil
 			}
 
-			this.helpText = "Select directory to jump to."
+			this.helpText = "Select a location to jump to."
 			this.mode = ModeSelect
 			return this, nil
 
@@ -72,13 +73,13 @@ func (this ViewService) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			key := msg.String()
 			path, ok := this.locations[key]
 			if !ok {
-				this.helpText = fmt.Sprintf("No directory bound to %s.", key)
+				this.helpText = fmt.Sprintf("No location bound to %s.", key)
 				return this, nil
 			}
 
 			if this.mode == ModeDelete {
 				delete(this.locations, key)
-				this.helpText = fmt.Sprintf("Removed directory from %s.", key)
+				this.helpText = fmt.Sprintf("Deleted location from %s.", key)
 				return this, this.saveChanges()
 			}
 
@@ -104,6 +105,11 @@ func dirName(path string) string {
 	return name
 }
 
+var (
+	success = lipgloss.NewStyle().Foreground(lipgloss.Color("2"))
+	danger  = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))
+)
+
 func (this ViewService) deleteView() string {
 	var builder strings.Builder
 	builder.WriteString("Fav Dirs\n\n")
@@ -116,10 +122,14 @@ func (this ViewService) deleteView() string {
 	for _, key := range keys {
 		path := this.locations[key]
 		dir := dirName(path)
-		builder.WriteString(fmt.Sprintf("xxx [%s] %s\n", key, dir))
+		bind := danger.Render(key)
+		prefix := danger.Render("!!!")
+		builder.WriteString(fmt.Sprintf("%s [%s] %s\n", prefix, bind, dir))
 	}
 
-	builder.WriteString(fmt.Sprintf("\n[help] %s [space] %s [esc] exit\n", this.helpText, ModeSelect))
+	space := success.Render("space")
+	esc := danger.Render("esc")
+	builder.WriteString(fmt.Sprintf("\n[help] %s [%s] %s [%s] exit\n", this.helpText, space, ModeSelect, esc))
 	return builder.String()
 }
 
@@ -135,10 +145,14 @@ func (this ViewService) selectView() string {
 	for _, key := range keys {
 		path := this.locations[key]
 		dir := dirName(path)
-		builder.WriteString(fmt.Sprintf("--> [%s] %s\n", key, dir))
+		bind := success.Render(key)
+		prefix := success.Render("-->")
+		builder.WriteString(fmt.Sprintf("%s [%s] %s\n", prefix, bind, dir))
 	}
 
-	builder.WriteString(fmt.Sprintf("\n[help] %s [space] %s [esc] exit\n", this.helpText, ModeDelete))
+	space := danger.Render("space")
+	esc := danger.Render("esc")
+	builder.WriteString(fmt.Sprintf("\n[help] %s [%s] %s [%s] exit\n", this.helpText, space, ModeDelete, esc))
 	return builder.String()
 }
 
