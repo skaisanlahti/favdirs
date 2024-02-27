@@ -56,7 +56,7 @@ func (this ViewService) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			this.selected = currentDirectory
-			return this, this.saveAndQuit()
+			return this, this.saveSelectedAndQuit()
 
 		case " ":
 			if this.mode == ModeSelect {
@@ -80,11 +80,11 @@ func (this ViewService) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if this.mode == ModeDelete {
 				delete(this.locations, key)
 				this.helpText = fmt.Sprintf("Deleted location from %s.", key)
-				return this, this.saveChanges()
+				return this, this.saveLocations()
 			}
 
 			this.selected = path
-			return this, this.saveAndQuit()
+			return this, this.saveSelectedAndQuit()
 		}
 	}
 
@@ -161,14 +161,9 @@ type errMsg struct {
 	err error
 }
 
-func (this ViewService) saveChanges() tea.Cmd {
+func (this ViewService) saveLocations() tea.Cmd {
 	return func() tea.Msg {
 		err := this.locationService.SaveLocations(this.locations)
-		if err != nil {
-			return errMsg{err}
-		}
-
-		err = this.locationService.SaveSelectedLocation(this.selected)
 		if err != nil {
 			return errMsg{err}
 		}
@@ -177,8 +172,7 @@ func (this ViewService) saveChanges() tea.Cmd {
 	}
 }
 
-func (this ViewService) saveAndQuit() tea.Cmd {
-	this.locationService.SaveLocations(this.locations)
+func (this ViewService) saveSelectedAndQuit() tea.Cmd {
 	this.locationService.SaveSelectedLocation(this.selected)
 	return tea.Quit
 }
