@@ -35,15 +35,6 @@ func (this LocationService) CurrentLocation() (string, error) {
 	return location, nil
 }
 
-func (this LocationService) SaveSelectedLocation(selected string) error {
-	err := os.WriteFile(this.selectFile, []byte(selected), 0666)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (this *LocationService) ReadSavedLocations() (map[string]string, error) {
 	locations := map[string]string{}
 	file, err := os.Open(this.locationFile)
@@ -64,6 +55,15 @@ func (this *LocationService) ReadSavedLocations() (map[string]string, error) {
 	}
 
 	return locations, nil
+}
+
+func (this LocationService) SaveSelectedLocation(selected string) error {
+	err := os.WriteFile(this.selectFile, []byte(selected), 0666)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (this LocationService) SaveLocations(locations map[string]string) error {
