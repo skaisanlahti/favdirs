@@ -1,5 +1,5 @@
 {{.StartComment}}
-function {{.Alias}}() {
+{{.Alias}}() {
     {{.ExecutablePath}} "$@"
     output=$(< {{.SelectPath}})
     cd $output

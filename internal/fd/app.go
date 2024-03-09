@@ -9,10 +9,10 @@ import (
 
 type App struct {
 	viewService     ViewService
-	locationService LocationService
+	locationService *LocationService
 }
 
-func NewApp(viewService ViewService, locationService LocationService) *App {
+func NewApp(viewService ViewService, locationService *LocationService) *App {
 	return &App{viewService, locationService}
 }
 
@@ -42,7 +42,7 @@ func (this *App) AddLocation(key string) {
 }
 
 func (this *App) ViewUserInterface() {
-	program := tea.NewProgram(this.viewService)
+	program := tea.NewProgram(this.viewService, tea.WithAltScreen())
 	model, err := program.Run()
 	if err != nil {
 		this.handleError("Error creating user interface:", err)

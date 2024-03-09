@@ -13,7 +13,7 @@ type LocationService struct {
 	selectFile   string
 }
 
-func NewLocationService() LocationService {
+func NewLocationService() *LocationService {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Println("Error getting user home directory:", err)
@@ -23,10 +23,10 @@ func NewLocationService() LocationService {
 	appDir := "/.fd-app"
 	locationFile := homeDir + appDir + "/locations"
 	selectFile := homeDir + appDir + "/select"
-	return LocationService{locationFile, selectFile}
+	return &LocationService{locationFile, selectFile}
 }
 
-func (this LocationService) CurrentLocation() (string, error) {
+func (this *LocationService) CurrentLocation() (string, error) {
 	location, err := os.Getwd()
 	if err != nil {
 		return location, err
@@ -57,7 +57,7 @@ func (this *LocationService) ReadSavedLocations() (map[string]string, error) {
 	return locations, nil
 }
 
-func (this LocationService) SaveSelectedLocation(selected string) error {
+func (this *LocationService) SaveSelectedLocation(selected string) error {
 	err := os.WriteFile(this.selectFile, []byte(selected), 0666)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (this LocationService) SaveSelectedLocation(selected string) error {
 	return nil
 }
 
-func (this LocationService) SaveLocations(locations map[string]string) error {
+func (this *LocationService) SaveLocations(locations map[string]string) error {
 	var builder strings.Builder
 	keys := []string{}
 	for k := range locations {
