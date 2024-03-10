@@ -2,7 +2,6 @@ package fd
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"sort"
@@ -290,7 +289,8 @@ var (
 func contentBox(content string) string {
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error in contentBox", err)
+		os.Exit(1)
 	}
 
 	return frame.Width(width).Height(height).Render(content)
@@ -299,7 +299,8 @@ func contentBox(content string) string {
 func divider() string {
 	width, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error in divider", err)
+		os.Exit(1)
 	}
 
 	dividerLen := maxWidth
