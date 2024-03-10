@@ -26,7 +26,7 @@ type SelectScreen struct {
 func NewSelectScreen(locations map[string]string) SelectScreen {
 	return SelectScreen{
 		locations: locations,
-		helpText:  "Select a location to jump to.",
+		helpText:  "Select a directory to jump to.",
 	}
 }
 
@@ -42,7 +42,7 @@ func (this SelectScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			key := msg.String()
 			path, ok := this.locations[key]
 			if !ok {
-				this.helpText = fmt.Sprintf("No location bound to %s.", key)
+				this.helpText = fmt.Sprintf("No directory bound to %s.", key)
 				return this, nil
 			}
 
@@ -76,7 +76,7 @@ type DeleteScreen struct {
 func NewDeleteScreen(locations map[string]string) DeleteScreen {
 	return DeleteScreen{
 		locations: locations,
-		helpText:  "Delete a location binding.",
+		helpText:  "Delete a directory binding.",
 	}
 }
 
@@ -90,12 +90,12 @@ func (this DeleteScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		key := msg.String()
 		_, ok := this.locations[key]
 		if !ok {
-			this.helpText = fmt.Sprintf("No location bound to %s.", key)
+			this.helpText = fmt.Sprintf("No directory bound to %s.", key)
 			return this, nil
 		}
 
 		delete(this.locations, key)
-		this.helpText = fmt.Sprintf("Deleted location from %s.", key)
+		this.helpText = fmt.Sprintf("Deleted directory from %s.", key)
 		return this, SaveLocationsCmd(this.locations)
 	}
 
@@ -127,7 +127,7 @@ func NewAddScreen(current string, locations map[string]string) AddScreen {
 	return AddScreen{
 		locations: locations,
 		current:   current,
-		helpText:  "Add current location by pressing a key.",
+		helpText:  "Add current directory by pressing a key.",
 	}
 }
 
@@ -143,12 +143,12 @@ func (this AddScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			key := msg.String()
 			_, ok := this.locations[key]
 			if ok {
-				this.helpText = fmt.Sprintf("Key %s is already bound to a location.", key)
+				this.helpText = fmt.Sprintf("Key %s is already bound to a directory.", key)
 				return this, nil
 			}
 
 			this.locations[key] = this.current
-			this.helpText = fmt.Sprintf("Location added to %s.", key)
+			this.helpText = fmt.Sprintf("Directory bound to %s.", key)
 			return this, SaveLocationsCmd(this.locations)
 		}
 	}
