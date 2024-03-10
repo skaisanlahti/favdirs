@@ -1,3 +1,5 @@
+![favdirs screenshot](./assets/favdirs.png)
+
 # Favdirs - Favourite Directories
 
 Favdirs is terminal navigator that allows you to save directories as keybinds to jump to them easily without writing file paths or search terms.
@@ -8,16 +10,6 @@ Favdirs is terminal navigator that allows you to save directories as keybinds to
 - [Bubbletea](https://github.com/charmbracelet/bubbletea)
 - [Lipgloss](https://github.com/charmbracelet/lipgloss)
 - [Task](https://taskfile.dev/)
-
-## Usage
-
-```bash
-# add current directory to favourites bound to given key
-fd <key>
-
-# open list of favourite directories 
-fd
-```
 
 ## Install
 
@@ -32,7 +24,15 @@ go run ./cmd/install/main.go
 cd && source .bashrc
 ```
 
-![favdirs screenshot](./assets/favdirs.png)
+## Usage
+
+```bash
+# add current directory to favourites bound to given key
+fd <key>
+
+# open list of favourite directories 
+fd
+```
 
 ## Concept
 
