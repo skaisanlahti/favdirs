@@ -1,6 +1,7 @@
 package fd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -16,7 +17,12 @@ func NewApp(viewService ViewService, locationService *LocationService) *App {
 	return &App{viewService, locationService}
 }
 
-func (this *App) AddLocation(key string) {
+func (this *App) AddLocation(arg string) {
+	key, err := validateKeybind(arg)
+	if err != nil {
+		this.handleError("Error reading args:", err)
+	}
+
 	locations, err := this.locationService.ReadSavedLocations()
 	if err != nil {
 		this.handleError("Error reading saved locations:", err)
@@ -57,4 +63,13 @@ func (this *App) ViewUserInterface() {
 func (this *App) handleError(message string, err error) {
 	fmt.Println(message, err)
 	os.Exit(1)
+}
+
+func validateKeybind(arg string) (string, error) {
+	char := []rune(arg)
+	if len(char) != 1 {
+		return arg, errors.New("Keybind must be a single character.")
+	}
+
+	return arg, nil
 }
