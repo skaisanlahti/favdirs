@@ -49,12 +49,7 @@ func (this *App) ViewUserInterface() {
 	}
 
 	lastState := model.(ViewService)
-	current, err := this.locationService.CurrentLocation()
-	if err != nil {
-		this.handleError("Error reading current location:", err)
-	}
-
-	if current != lastState.selected {
+	if lastState.current != lastState.selected {
 		fmt.Printf("\nMoving to %s...\n", lastState.selected)
 	}
 }
