@@ -2,6 +2,8 @@ version: '3'
 
 tasks:
   build:
+    aliases: [b]
+    desc: Build and install application
     cmds:
       - go build -o ./build/app ./cmd/app/main.go
       - go run ./cmd/install/main.go

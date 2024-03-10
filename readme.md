@@ -19,6 +19,19 @@ fd <key>
 fd
 ```
 
+## Install
+
+```bash
+# using task
+mv taskfile.dist.yaml taskfile.yaml
+task build
+
+# using commands directly
+go build -o ./build/app ./cmd/app/main.go
+go run ./cmd/install/main.go
+cd && source .bashrc
+```
+
 ![favdirs screenshot](./assets/favdirs.png)
 
 ## Concept
