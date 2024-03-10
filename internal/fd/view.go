@@ -56,13 +56,13 @@ func (this SelectScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (this SelectScreen) View() string {
 	list := lipgloss.JoinVertical(
 		lipgloss.Left,
-		fmt.Sprintf("[help] %s", this.helpText),
+		helpText("help", this.helpText),
 		divider(),
 		locationList(this.locations, success),
 		divider(),
-		fmt.Sprintf("[ctrl+a] Add directory"),
-		fmt.Sprintf("[ctrl+d] Delete directory"),
-		fmt.Sprintf("[ctrl+c] Exit\n"),
+		helpText("ctrl+a", "Add directory"),
+		helpText("ctrl+d", "Delete directory"),
+		helpText("ctrl+c", "Exit\n"),
 	)
 
 	return contentBox(list)
@@ -105,13 +105,13 @@ func (this DeleteScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (this DeleteScreen) View() string {
 	list := lipgloss.JoinVertical(
 		lipgloss.Left,
-		fmt.Sprintf("[help] %s", this.helpText),
+		helpText("help", this.helpText),
 		divider(),
 		locationList(this.locations, danger),
 		divider(),
-		fmt.Sprintf("[ctrl+a] Add directory"),
-		fmt.Sprintf("[ctrl+s] Select directory"),
-		fmt.Sprintf("[ctrl+c] Exit\n"),
+		helpText("ctrl+a", "Add directory"),
+		helpText("ctrl+s", "Select directory"),
+		helpText("ctrl+c", "Exit\n"),
 	)
 
 	return contentBox(list)
@@ -159,13 +159,13 @@ func (this AddScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (this AddScreen) View() string {
 	list := lipgloss.JoinVertical(
 		lipgloss.Left,
-		fmt.Sprintf("[help] %s", this.helpText),
+		helpText("help", this.helpText),
 		divider(),
 		locationList(this.locations, warning),
 		divider(),
-		fmt.Sprintf("[ctrl+d] Delete directory"),
-		fmt.Sprintf("[ctrl+s] Select directory"),
-		fmt.Sprintf("[ctrl+c] Exit\n"),
+		helpText("ctrl+d", "Delete directory"),
+		helpText("ctrl+s", "Select directory"),
+		helpText("ctrl+c", "Exit\n"),
 	)
 
 	return contentBox(list)
@@ -294,6 +294,11 @@ func contentBox(content string) string {
 	}
 
 	return frame.Width(width).Height(height).Render(content)
+}
+
+func helpText(key, text string) string {
+	styleKey := warning.Render(key)
+	return fmt.Sprintf("[%s] %s", styleKey, text)
 }
 
 func divider() string {
